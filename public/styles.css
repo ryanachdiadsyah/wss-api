@@ -1,0 +1,160 @@
+/* Estilos gerais */
+body {
+    background-color: #f5f5f5;
+}
+
+.container {
+    max-width: 1200px;
+}
+
+/* Cabeçalho */
+header h1 {
+    font-weight: 700;
+    color: #075E54;
+}
+
+/* Cartões */
+.card {
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border: none;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #eaeaea;
+    border-top-left-radius: 10px !important;
+    border-top-right-radius: 10px !important;
+}
+
+/* Sessões */
+.session-item {
+    transition: all 0.2s ease;
+    border-left: 5px solid transparent;
+}
+
+.session-item.connected {
+    border-left-color: #25D366;
+}
+
+.session-item.disconnected {
+    border-left-color: #dc3545;
+}
+
+.session-item:hover {
+    background-color: #f8f9fa;
+}
+
+.status-badge {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.session-actions {
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.session-item:hover .session-actions {
+    opacity: 1;
+}
+
+/* QR Code */
+#qrcode-container {
+    padding: 20px;
+}
+
+#qr-canvas {
+    margin: 0 auto;
+    display: block;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.qr-code-img {
+    margin: 0 auto;
+    display: block;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-width: 100%;
+}
+
+/* Login */
+.login-card {
+    max-width: 400px;
+    margin: 0 auto;
+    margin-top: 100px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Botões */
+.btn-success {
+    background-color: #25D366;
+    border-color: #25D366;
+}
+
+.btn-success:hover {
+    background-color: #128C7E;
+    border-color: #128C7E;
+}
+
+/* Estilo para badges de status */
+.status-badge {
+    font-size: 0.75rem;
+}
+
+/* Estilo para itens de webhook */
+.webhook-item {
+    transition: all 0.2s ease;
+}
+
+.webhook-item:hover {
+    background-color: #f8f9fa;
+}
+
+.webhook-actions {
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
+}
+
+.webhook-item:hover .webhook-actions {
+    opacity: 1;
+}
+
+/* Estilos para os badges de eventos */
+.badge.bg-primary {
+    background-color: #0d6efd !important;
+}
+
+.badge.bg-success {
+    background-color: #198754 !important;
+}
+
+.badge.bg-danger {
+    background-color: #dc3545 !important;
+}
+
+.badge.bg-warning {
+    background-color: #ffc107 !important;
+    color: #212529;
+}
+
+.badge.bg-secondary {
+    background-color: #6c757d !important;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .session-actions {
+        display: flex;
+        margin-top: 10px;
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .session-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

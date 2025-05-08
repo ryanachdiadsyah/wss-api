@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Model to store WhatsApp session data
+model WhatsAppSession {
+  id        String    @id @default(uuid())
+  sessionId String    @unique
+  data      String // JSON stringified session data
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Message   Message[]
+  Webhook   Webhook[]
+}
+
+// Model to store messages
+model Message {
+  id        String   @id @default(uuid())
+  messageId String   @unique
+  sessionId String
+  jid       String // The WhatsApp ID (phone number or group ID)
+  content   String // JSON stringified message content
+  status    String // sent, delivered, read, etc.
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relation to WhatsAppSession
+  session WhatsAppSession @relation(fields: [sessionId], references: [sessionId])
+
+  @@index([sessionId])
+  @@index([jid])
+}
+
+// Model to store webhooks
+model Webhook {
+  id        String   @id @default(uuid())
+  url       String
+  sessionId String
+  events    String[] // Array of events to listen for
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relation to WhatsAppSession
+  session WhatsAppSession @relation(fields: [sessionId], references: [sessionId])
+
+  @@index([sessionId])
+}

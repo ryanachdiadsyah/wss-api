@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp API - Gerenciador de Sessões</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="my-4 text-center">
+            <div class="d-flex justify-content-between align-items-center">
+                <div></div> <!-- Espaço vazio para centralizar o título -->
+                <div>
+                    <h1><i class="bi bi-whatsapp text-success"></i> WhatsApp API</h1>
+                    <p class="lead">Gerenciador de Sessões</p>
+                </div>
+                <div>
+                    <button id="logout-button" class="btn btn-outline-danger">
+                        <i class="bi bi-box-arrow-right"></i> Sair
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Nova Sessão</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="create-session-form">
+                            <div class="mb-3">
+                                <label for="sessionId" class="form-label">ID da Sessão</label>
+                                <input type="text" class="form-control" id="sessionId" required>
+                                <div class="form-text">Escolha um identificador único para esta sessão.</div>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="bi bi-plus-circle"></i> Criar Sessão
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5>Sessões Ativas</h5>
+                        <button id="refresh-sessions" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-arrow-clockwise"></i> Atualizar
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="sessions-list" class="list-group">
+                            <div class="text-center py-4 text-muted">
+                                <i class="bi bi-hourglass"></i> Carregando sessões...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para exibir QR Code -->
+        <div class="modal fade" id="qrCodeModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Escaneie o Código QR</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <div id="qrcode-container">
+                            <div class="spinner-border text-success" role="status">
+                                <span class="visually-hidden">Carregando...</span>
+                            </div>
+                            <p class="mt-2">Carregando código QR...</p>
+                        </div>
+                        <div id="qrcode-connected" class="d-none">
+                            <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+                            <p class="mt-2">Conectado com sucesso!</p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal para gerenciar webhooks -->
+        <div class="modal fade" id="webhookModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Gerenciar Webhooks</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="webhook-session-id" class="d-none"></div>
+                        
+                        <!-- Formulário para adicionar webhook -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h6 class="mb-0">Adicionar Webhook</h6>
+                            </div>
+                            <div class="card-body">
+                                <form id="add-webhook-form">
+                                    <div class="mb-3">
+                                        <label for="webhook-url" class="form-label">URL do Webhook</label>
+                                        <input type="url" class="form-control" id="webhook-url" placeholder="https://seu-servidor.com/webhook" required>
+                                        <div class="form-text">URL para onde os eventos serão enviados.</div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">Eventos</label>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-check">
+                                                    <input class="form-check-input webhook-event" type="checkbox" value="messages.received" id="event-messages-received" checked>
+                                                    <label class="form-check-label" for="event-messages-received">
+                                                        Mensagens Recebidas
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-check">
+                                                    <input class="form-check-input webhook-event" type="checkbox" value="connection.open" id="event-connection-open">
+                                                    <label class="form-check-label" for="event-connection-open">
+                                                        Conexão Aberta
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-check">
+                                                    <input class="form-check-input webhook-event" type="checkbox" value="connection.logout" id="event-connection-logout">
+                                                    <label class="form-check-label" for="event-connection-logout">
+                                                        Logout
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-check">
+                                                    <input class="form-check-input webhook-event" type="checkbox" value="qr.update" id="event-qr-update">
+                                                    <label class="form-check-label" for="event-qr-update">
+                                                        QR Code Atualizado
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="bi bi-plus-circle"></i> Adicionar Webhook
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <!-- Lista de webhooks -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">Webhooks Configurados</h6>
+                                <button id="refresh-webhooks" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-arrow-clockwise"></i> Atualizar
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div id="webhooks-list" class="list-group">
+                                    <div class="text-center py-4 text-muted">
+                                        <i class="bi bi-hourglass"></i> Carregando webhooks...
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
