@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const usernameDisplay = document.getElementById('username');
     const validDateDisplay = document.getElementById('validDate');
     const myApiKeyDisplay = document.getElementById('myApiKey');
+    const currentSessionDisplay = document.getElementById('currentSession');
     const maxSessionDisplay = document.getElementById('maxSession');
     
     const API_URL = '/api';
@@ -70,6 +71,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             
             if (response.ok) {
+                // count the number of sessions
+                const sessionCount = data.sessions.length;
+                currentSessionDisplay.textContent = sessionCount;
+                if (sessionCount >= localStorage.getItem('maxSession')) {
+                    document.getElementById('alert-info').classList.remove('d-none');
+                    document.getElementById('alert-info').innerHTML = 'You have reached the maximum number of sessions '+localStorage.getItem('maxSession')+'';
+                }
                 renderSessions(data.sessions);
             } else {
                 showError('Something was wrong while loading sessions ' + data.error);
