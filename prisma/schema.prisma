@@ -10,46 +10,61 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Model to store WhatsApp session data
-model WhatsAppSession {
-  id        String    @id @default(uuid())
-  sessionId String    @unique
-  data      String // JSON stringified session data
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  Message   Message[]
-  Webhook   Webhook[]
+model Users {
+  id          String             @id @default(uuid())
+  username    String             @unique
+  password    String
+  api_key     String             @unique
+  maxSession  Int                @default(0)
+  valid_until DateTime
+  is_active   Boolean            @default(true)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  sessions    WhatsAppSession[]
 }
 
-// Model to store messages
+model WhatsAppSession {
+  id        String    @id @default(uuid())
+  userId   String
+  sessionId String    @unique
+  data      Json
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  users     Users     @relation(fields: [userId], references: [id])
+  messages  Message[]
+  webhooks  Webhook[]
+
+  @@index([userId])
+  @@index([sessionId])
+}
+
 model Message {
   id        String   @id @default(uuid())
-  messageId String   @unique
+  messageId String
   sessionId String
-  jid       String // The WhatsApp ID (phone number or group ID)
-  content   String // JSON stringified message content
-  status    String // sent, delivered, read, etc.
+  jid       String
+  content   Json
+  status    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relation to WhatsAppSession
-  session WhatsAppSession @relation(fields: [sessionId], references: [sessionId])
+  session   WhatsAppSession @relation(fields: [sessionId], references: [sessionId])
 
   @@index([sessionId])
   @@index([jid])
+  @@unique([messageId, sessionId])
 }
 
-// Model to store webhooks
 model Webhook {
   id        String   @id @default(uuid())
   url       String
   sessionId String
-  events    String[] // Array of events to listen for
+  events    String[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relation to WhatsAppSession
-  session WhatsAppSession @relation(fields: [sessionId], references: [sessionId])
+  session   WhatsAppSession @relation(fields: [sessionId], references: [sessionId])
 
   @@index([sessionId])
 }

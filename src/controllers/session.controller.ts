@@ -13,9 +13,28 @@ import {
 export const createSession = async (req: Request, res: Response) => {
   try {
     const { sessionId } = req.body;
+    const apiKey = req.headers.authorization?.split(' ')[1];
 
     if (!sessionId) {
       return res.status(400).json({ error: 'Session ID is required' });
+    }
+
+    // Get User ID from API key
+    const user = await prisma.users.findUnique({
+      where: { api_key: apiKey }
+    });
+    
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid API key' });
+    }
+
+    // Check limit of sessions for the user
+    const sessionCount = await prisma.whatsAppSession.count({
+      where: { userId: user.id }
+    });
+
+    if (sessionCount >= user.maxSession) {
+      return res.status(403).json({ error: 'Session limit reached' });
     }
 
     // Check if session already exists
@@ -27,8 +46,7 @@ export const createSession = async (req: Request, res: Response) => {
       return res.status(409).json({ error: 'Session already exists' });
     }
 
-    // Create new WhatsApp session
-    const session = await createWhatsAppSession(sessionId);
+    const session = await createWhatsAppSession(sessionId, user.id);
     
     return res.status(201).json({ 
       message: 'Session created successfully',
@@ -49,7 +67,24 @@ export const createSession = async (req: Request, res: Response) => {
  */
 export const getAllSessions = async (req: Request, res: Response) => {
   try {
+
+    const apiKey = req.headers.authorization?.split(' ')[1];
+    if (!apiKey) {
+      return res.status(401).json({ error: 'API key is required' });
+    }
+    
+    // Get User ID from API key
+    const user = await prisma.users.findUnique({
+      where: { api_key: apiKey }
+    });
+    
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid API key' });
+    }
+
+    // Get all sessions for the user
     const sessions = await prisma.whatsAppSession.findMany({
+      where: { userId: user.id },
       select: {
         id: true,
         sessionId: true,

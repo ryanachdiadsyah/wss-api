@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WhatsApp API - Login</title>
+    <title>WSS - Rest Api</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
     <link rel="stylesheet" href="styles.css">
@@ -16,17 +16,17 @@
                     <div class="card-body">
                         <div class="text-center mb-4">
                             <i class="bi bi-whatsapp text-success" style="font-size: 3rem;"></i>
-                            <h2 class="mt-2">WhatsApp API</h2>
-                            <p class="text-muted">Faça login para continuar</p>
+                            <h2 class="mt-2">Whatsapp Service Standalone</h2>
+                            <p class="text-muted">Please Login</p>
                         </div>
                         
                         <div id="login-error" class="alert alert-danger d-none" role="alert">
-                            Usuário ou senha incorretos
+                            Incorrect username or password
                         </div>
                         
                         <form id="login-form">
                             <div class="mb-3">
-                                <label for="username" class="form-label">Usuário</label>
+                                <label for="username" class="form-label">Username</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-person"></i></span>
                                     <input type="text" class="form-control" id="username" required>
@@ -34,7 +34,7 @@
                             </div>
                             
                             <div class="mb-4">
-                                <label for="password" class="form-label">Senha</label>
+                                <label for="password" class="form-label">Password</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-lock"></i></span>
                                     <input type="password" class="form-control" id="password" required>
@@ -42,10 +42,11 @@
                             </div>
                             
                             <button type="submit" class="btn btn-success w-100" id="login-button">
-                                <span id="login-button-text">Entrar</span>
+                                <span id="login-button-text">Login</span>
                                 <span id="login-spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                             </button>
                         </form>
+                        <a href="https://wa.me/6281263280610" class="btn btn-primary w-100 mt-2" target="_blank">Register</a>
                     </div>
                 </div>
             </div>

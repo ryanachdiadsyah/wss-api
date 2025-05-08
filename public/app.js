@@ -1,12 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Verificar autenticação
     if (!localStorage.getItem('authToken')) {
-        // Redirecionar para a página de login
         window.location.href = '/login.html';
         return;
     }
     
-    // Elementos da UI
     const createSessionForm = document.getElementById('create-session-form');
     const sessionsList = document.getElementById('sessions-list');
     const refreshButton = document.getElementById('refresh-sessions');
@@ -19,41 +16,49 @@ document.addEventListener('DOMContentLoaded', () => {
     const webhooksList = document.getElementById('webhooks-list');
     const refreshWebhooksButton = document.getElementById('refresh-webhooks');
     const webhookSessionId = document.getElementById('webhook-session-id');
+    const usernameDisplay = document.getElementById('username');
+    const validDateDisplay = document.getElementById('validDate');
+    const myApiKeyDisplay = document.getElementById('myApiKey');
     
-    // API Base URL
     const API_URL = '/api';
     
-    // Carregar sessões ao iniciar
     loadSessions();
     
-    // Event listeners
     createSessionForm.addEventListener('submit', createSession);
     refreshButton.addEventListener('click', loadSessions);
     logoutButton.addEventListener('click', logout);
+
+    const validDate = new Date(localStorage.getItem('validDate'));
+    const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+    const formattedDate = validDate.toLocaleString('id-ID', options).replace(',', '');
+
+    usernameDisplay.textContent = "Hello, "+localStorage.getItem('username');
+    validDateDisplay.textContent = "Valid Until : "+formattedDate;
+    myApiKeyDisplay.value = localStorage.getItem('apiKey');
     
-    // Função para fazer logout
     function logout() {
         localStorage.removeItem('authToken');
+        localStorage.removeItem('username');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('validDate');
+        localStorage.removeItem('apiKey');
         window.location.href = '/login.html';
     }
     
-    // Função para obter o token de autenticação
     function getAuthHeaders() {
-        const token = localStorage.getItem('authToken');
+        const apiKey = localStorage.getItem('apiKey');
         return {
-            'Authorization': `Bearer ${token}`,
+            'Authorization': `Bearer ${apiKey}`,
             'Content-Type': 'application/json'
         };
     }
     
-    // Função para carregar todas as sessões
     async function loadSessions() {
         try {
             const response = await fetch(`${API_URL}/sessions`, {
                 headers: getAuthHeaders()
             });
             
-            // Verificar se o token expirou
             if (response.status === 401) {
                 logout();
                 return;
@@ -64,21 +69,20 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 renderSessions(data.sessions);
             } else {
-                showError('Erro ao carregar sessões: ' + data.error);
+                showError('Something was wrong while loading sessions ' + data.error);
             }
         } catch (error) {
-            showError('Erro ao conectar com o servidor: ' + error.message);
+            showError('Something was wrong with server: ' + error.message);
         }
     }
     
-    // Função para criar uma nova sessão
     async function createSession(event) {
         event.preventDefault();
         
         const sessionId = document.getElementById('sessionId').value.trim();
         
         if (!sessionId) {
-            showError('O ID da sessão é obrigatório');
+            showError('Required session ID');
             return;
         }
         
@@ -89,7 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ sessionId })
             });
             
-            // Verificar se o token expirou
             if (response.status === 401) {
                 logout();
                 return;
@@ -102,36 +105,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 loadSessions();
                 showQRCode(sessionId);
             } else {
-                showError('Erro ao criar sessão: ' + data.error);
+                showError('Somethins was wrong whloe creating a session: ' + data.error);
             }
         } catch (error) {
-            showError('Erro ao conectar com o servidor: ' + error.message);
+            showError('Something was wrong with server: ' + error.message);
         }
     }
     
-    // Função para exibir o QR Code
     function showQRCode(sessionId) {
-        // Resetar o modal
         qrCodeContainer.innerHTML = `
             <div class="spinner-border text-success" role="status">
-                <span class="visually-hidden">Carregando...</span>
+                <span class="visually-hidden">Loading...</span>
             </div>
-            <p class="mt-2">Carregando código QR...</p>
+            <p class="mt-2">Loading QR...</p>
         `;
         qrCodeContainer.classList.remove('d-none');
         qrCodeConnected.classList.add('d-none');
         
-        // Mostrar o modal
         qrCodeModal.show();
         
-        // Iniciar polling para obter o QR code
         const qrInterval = setInterval(async () => {
             try {
                 const response = await fetch(`${API_URL}/sessions/${sessionId}/qr`, {
                     headers: getAuthHeaders()
                 });
                 
-                // Verificar se o token expirou
                 if (response.status === 401) {
                     clearInterval(qrInterval);
                     qrCodeModal.hide();
@@ -143,11 +141,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (response.ok && data.qrCode) {
                     console.log('QR code received from API');
-                    // Limpar o container
                     qrCodeContainer.innerHTML = '';
                     
                     try {
-                        // Gerar QR code como URL de dados
                         console.log('Generating QR code image');
                         QRCode.toDataURL(data.qrCode, { 
                             width: 256,
@@ -159,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }, function(error, url) {
                             if (error) {
                                 console.error('Error generating QR code URL:', error);
-                                qrCodeContainer.innerHTML = `<p class="text-danger">Erro ao gerar QR code: ${error}</p>`;
+                                qrCodeContainer.innerHTML = `<p class="text-danger">Error generating QR code: ${error}</p>`;
                             } else {
                                 console.log('QR code generated successfully');
                                 const img = document.createElement('img');
@@ -169,30 +165,27 @@ document.addEventListener('DOMContentLoaded', () => {
                                 qrCodeContainer.innerHTML = '';
                                 qrCodeContainer.appendChild(img);
                                 
-                                // Adicionar instruções
                                 const instructionsElement = document.createElement('p');
                                 instructionsElement.classList.add('mt-3');
                                 instructionsElement.innerHTML = `
-                                    <strong>Instruções:</strong><br>
-                                    1. Abra o WhatsApp no seu telefone<br>
-                                    2. Toque em Menu ou Configurações e selecione WhatsApp Web<br>
-                                    3. Aponte a câmera do seu telefone para este código QR
+                                    <strong>Instruction:</strong><br>
+                                    1. Open WhatsApp on your phone<br>
+                                    2. Tap Menu or Settings and select WhatsApp Web<br>
+                                    3. Point your phone's camera at this QR code
                                 `;
                                 qrCodeContainer.appendChild(instructionsElement);
                             }
                         });
                     } catch (error) {
                         console.error('Error generating QR code:', error);
-                        qrCodeContainer.innerHTML = `<p class="text-danger">Erro ao gerar QR code: ${error}</p>`;
+                        qrCodeContainer.innerHTML = `<p class="text-danger">Error generating QR code: ${error}</p>`;
                     }
                 } else if (response.status === 404) {
                     console.log('QR code not available, checking if session is connected');
-                    // Verificar se a sessão está conectada
                     const sessionResponse = await fetch(`${API_URL}/sessions/${sessionId}`, {
                         headers: getAuthHeaders()
                     });
                     
-                    // Verificar se o token expirou
                     if (sessionResponse.status === 401) {
                         clearInterval(qrInterval);
                         qrCodeModal.hide();
@@ -210,22 +203,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             } catch (error) {
-                console.error('Erro ao obter QR code:', error);
+                console.error('Error retrieving QR code:', error);
             }
         }, 2000);
         
-        // Limpar o intervalo quando o modal for fechado
         document.getElementById('qrCodeModal').addEventListener('hidden.bs.modal', () => {
             clearInterval(qrInterval);
         });
     }
     
-    // Função para renderizar a lista de sessões
     function renderSessions(sessions) {
         if (!sessions || sessions.length === 0) {
             sessionsList.innerHTML = `
                 <div class="text-center py-4 text-muted">
-                    <i class="bi bi-exclamation-circle"></i> Nenhuma sessão encontrada
+                    <i class="bi bi-exclamation-circle"></i> No sessions found
                 </div>
             `;
             return;
@@ -234,12 +225,10 @@ document.addEventListener('DOMContentLoaded', () => {
         sessionsList.innerHTML = '';
         
         sessions.forEach(session => {
-            // Verificar status da sessão
             fetch(`${API_URL}/sessions/${session.sessionId}`, {
                 headers: getAuthHeaders()
             })
                 .then(res => {
-                    // Verificar se o token expirou
                     if (res.status === 401) {
                         logout();
                         return null;
@@ -252,15 +241,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     const isConnected = data.session.isConnected;
                     const statusClass = isConnected ? 'connected' : 'disconnected';
                     const statusBadge = isConnected 
-                        ? '<span class="badge bg-success status-badge">Conectado</span>' 
-                        : '<span class="badge bg-danger status-badge">Desconectado</span>';
+                        ? '<span class="badge bg-success status-badge">Connected</span>' 
+                        : '<span class="badge bg-danger status-badge">Disconnected</span>';
                     
                     const sessionElement = document.createElement('div');
                     sessionElement.className = `list-group-item session-item ${statusClass} d-flex justify-content-between align-items-center`;
                     sessionElement.innerHTML = `
                         <div>
                             <h6 class="mb-1">${session.sessionId}</h6>
-                            <small class="text-muted">Criado em: ${new Date(session.createdAt).toLocaleString()}</small>
+                            <small class="text-muted">Created At: ${new Date(session.createdAt).toLocaleString()}</small>
                             <div class="mt-1">${statusBadge}</div>
                         </div>
                         <div class="session-actions">
@@ -278,7 +267,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     `;
                     
-                    // Adicionar event listeners
                     const qrButton = sessionElement.querySelector('.show-qr');
                     if (qrButton) {
                         qrButton.addEventListener('click', () => {
@@ -299,14 +287,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     sessionsList.appendChild(sessionElement);
                 })
                 .catch(error => {
-                    console.error('Erro ao verificar status da sessão:', error);
+                    console.error('Error checking session status:', error);
                 });
         });
     }
     
-    // Função para deletar uma sessão
     async function deleteSession(sessionId) {
-        if (!confirm(`Tem certeza que deseja excluir a sessão "${sessionId}"?`)) {
+        if (!confirm(`Are you sure you want to delete the session? "${sessionId}"?`)) {
             return;
         }
         
@@ -316,7 +303,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: getAuthHeaders()
             });
             
-            // Verificar se o token expirou
             if (response.status === 401) {
                 logout();
                 return;
@@ -326,44 +312,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 loadSessions();
             } else {
                 const data = await response.json();
-                showError('Erro ao excluir sessão: ' + data.error);
+                showError('Error deleting session: ' + data.error);
             }
         } catch (error) {
-            showError('Erro ao conectar com o servidor: ' + error.message);
+            showError('Error connecting to server: ' + error.message);
         }
     }
     
-    // Função para exibir mensagens de erro
     function showError(message) {
         alert(message);
     }
     
-    // Função para mostrar o gerenciador de webhooks
     function showWebhookManager(sessionId) {
-        // Armazenar o ID da sessão
         webhookSessionId.textContent = sessionId;
         
-        // Limpar formulário
         document.getElementById('webhook-url').value = '';
         document.querySelectorAll('.webhook-event').forEach(checkbox => {
             checkbox.checked = checkbox.id === 'event-messages-received';
         });
         
-        // Carregar webhooks existentes
         loadWebhooks(sessionId);
         
-        // Mostrar modal
         webhookModal.show();
     }
     
-    // Função para carregar webhooks
     async function loadWebhooks(sessionId) {
         try {
             const response = await fetch(`${API_URL}/webhooks?sessionId=${sessionId}`, {
                 headers: getAuthHeaders()
             });
             
-            // Verificar se o token expirou
             if (response.status === 401) {
                 webhookModal.hide();
                 logout();
@@ -375,19 +353,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 renderWebhooks(data.webhooks);
             } else {
-                showError('Erro ao carregar webhooks: ' + data.error);
+                showError('Error loading webhooks: ' + data.error);
             }
         } catch (error) {
-            showError('Erro ao conectar com o servidor: ' + error.message);
+            showError('Error connecting to server: ' + error.message);
         }
     }
     
-    // Função para renderizar webhooks
     function renderWebhooks(webhooks) {
         if (!webhooks || webhooks.length === 0) {
             webhooksList.innerHTML = `
                 <div class="text-center py-4 text-muted">
-                    <i class="bi bi-exclamation-circle"></i> Nenhum webhook configurado
+                    <i class="bi bi-exclamation-circle"></i> No webhook configured
                 </div>
             `;
             return;
@@ -399,17 +376,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const webhookElement = document.createElement('div');
             webhookElement.className = 'list-group-item webhook-item d-flex justify-content-between align-items-center';
             
-            // Formatar eventos
             const eventBadges = webhook.events.map(event => {
                 let badgeClass = 'bg-secondary';
                 let eventName = event;
                 
                 if (event === 'messages.received') {
                     badgeClass = 'bg-primary';
-                    eventName = 'Mensagens';
+                    eventName = 'Messages';
                 } else if (event === 'connection.open') {
                     badgeClass = 'bg-success';
-                    eventName = 'Conexão';
+                    eventName = 'Connection';
                 } else if (event === 'connection.logout') {
                     badgeClass = 'bg-danger';
                     eventName = 'Logout';
@@ -424,7 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
             webhookElement.innerHTML = `
                 <div>
                     <h6 class="mb-1">${webhook.url}</h6>
-                    <small class="text-muted">Criado em: ${new Date(webhook.createdAt).toLocaleString()}</small>
+                    <small class="text-muted">Created At: ${new Date(webhook.createdAt).toLocaleString()}</small>
                     <div class="mt-1">${eventBadges}</div>
                 </div>
                 <div class="webhook-actions">
@@ -434,7 +410,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
             
-            // Adicionar event listener para excluir webhook
             const deleteButton = webhookElement.querySelector('.delete-webhook');
             deleteButton.addEventListener('click', () => {
                 deleteWebhook(webhook.id);
@@ -444,26 +419,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Função para adicionar webhook
     async function addWebhook(event) {
         event.preventDefault();
         
         const sessionId = webhookSessionId.textContent;
         const url = document.getElementById('webhook-url').value.trim();
         
-        // Obter eventos selecionados
         const events = [];
         document.querySelectorAll('.webhook-event:checked').forEach(checkbox => {
             events.push(checkbox.value);
         });
         
         if (!url) {
-            showError('A URL do webhook é obrigatória');
+            showError('Webhook URL is required');
             return;
         }
         
         if (events.length === 0) {
-            showError('Selecione pelo menos um evento');
+            showError('Select at least one event');
             return;
         }
         
@@ -474,7 +447,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ sessionId, url, events })
             });
             
-            // Verificar se o token expirou
             if (response.status === 401) {
                 webhookModal.hide();
                 logout();
@@ -484,25 +456,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             
             if (response.ok) {
-                // Limpar formulário
                 document.getElementById('webhook-url').value = '';
                 document.querySelectorAll('.webhook-event').forEach(checkbox => {
                     checkbox.checked = checkbox.id === 'event-messages-received';
                 });
                 
-                // Recarregar webhooks
                 loadWebhooks(sessionId);
             } else {
-                showError('Erro ao adicionar webhook: ' + data.error);
+                showError('Error adding webhook: ' + data.error);
             }
         } catch (error) {
-            showError('Erro ao conectar com o servidor: ' + error.message);
+            showError('Error connecting to server: ' + error.message);
         }
     }
     
-    // Função para excluir webhook
     async function deleteWebhook(webhookId) {
-        if (!confirm('Tem certeza que deseja excluir este webhook?')) {
+        if (!confirm('Are you sure you want to delete this webhook??')) {
             return;
         }
         
@@ -512,7 +481,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: getAuthHeaders()
             });
             
-            // Verificar se o token expirou
             if (response.status === 401) {
                 webhookModal.hide();
                 logout();
@@ -520,7 +488,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             if (response.ok) {
-                // Recarregar webhooks
                 loadWebhooks(webhookSessionId.textContent);
             } else {
                 const data = await response.json();
@@ -531,7 +498,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Event listeners para webhooks
     addWebhookForm.addEventListener('submit', addWebhook);
     refreshWebhooksButton.addEventListener('click', () => {
         loadWebhooks(webhookSessionId.textContent);

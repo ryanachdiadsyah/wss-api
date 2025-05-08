@@ -62,12 +62,13 @@ export const initializeWhatsAppSessions = async (): Promise<void> => {
 /**
  * Create a new WhatsApp session
  */
-export const createWhatsAppSession = async (sessionId: string) => {
+export const createWhatsAppSession = async (sessionId: string, userId: string) => {
   try {
     // Create a new session in the database
     const session = await prisma.whatsAppSession.create({
       data: {
         sessionId,
+        userId,
         data: JSON.stringify({})
       }
     });

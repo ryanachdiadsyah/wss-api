@@ -3,7 +3,7 @@ import sessionRoutes from './session.routes';
 import messageRoutes from './message.routes';
 import webhookRoutes from './webhook.routes';
 import authRoutes from './auth.routes';
-import { verifyToken } from '../controllers/auth.controller';
+import { verifyApiKey } from '../controllers/auth.controller';
 
 const router = Router();
 
@@ -11,8 +11,8 @@ const router = Router();
 router.use('/auth', authRoutes);
 
 // Protected routes
-router.use('/sessions', verifyToken, sessionRoutes);
-router.use('/messages', verifyToken, messageRoutes);
-router.use('/webhooks', verifyToken, webhookRoutes);
+router.use('/sessions', verifyApiKey, sessionRoutes);
+router.use('/messages', verifyApiKey, messageRoutes);
+router.use('/webhooks', verifyApiKey, webhookRoutes);
 
 export default router;
