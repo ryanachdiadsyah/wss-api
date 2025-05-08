@@ -38,7 +38,14 @@ export const login = async (req: Request, res: Response) => {
     // Buat token JWT
     const token = jwt.sign({ userId: user.id, username: user.username }, jwtSecret, { expiresIn: '24h' });
 
-    return res.status(200).json({ token, user: { id: user.id, username: user.username, apiKey: user.api_key, validDate: user.valid_until } });
+    return res.status(200).json({ token, user: { 
+        id: user.id, 
+        username: user.username, 
+        apiKey: user.api_key, 
+        validDate: user.valid_until,
+        maxSession: user.maxSession,
+      } 
+  });
   } catch (error) {
     console.error('Error saat login:', error);
     return res.status(500).json({ error: 'Terjadi kesalahan server' });

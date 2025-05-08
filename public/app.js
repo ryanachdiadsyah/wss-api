@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const usernameDisplay = document.getElementById('username');
     const validDateDisplay = document.getElementById('validDate');
     const myApiKeyDisplay = document.getElementById('myApiKey');
+    const maxSessionDisplay = document.getElementById('maxSession');
     
     const API_URL = '/api';
     
@@ -35,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     usernameDisplay.textContent = "Hello, "+localStorage.getItem('username');
     validDateDisplay.textContent = "Valid Until : "+formattedDate;
     myApiKeyDisplay.value = localStorage.getItem('apiKey');
+    maxSessionDisplay.textContent = localStorage.getItem('maxSession');
     
     function logout() {
         localStorage.removeItem('authToken');
@@ -42,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.removeItem('userId');
         localStorage.removeItem('validDate');
         localStorage.removeItem('apiKey');
+        localStorage.removeItem('maxSession');
         window.location.href = '/login.html';
     }
     

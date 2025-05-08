@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem('userId', data.user.id);
                 localStorage.setItem('validDate', data.user.validDate);
                 localStorage.setItem('apiKey', data.user.apiKey);
+                localStorage.setItem('maxSession', data.user.maxSession);
                 window.location.href = '/';
             } else {
                 loginError.textContent = data.error || 'Authentication failed';
