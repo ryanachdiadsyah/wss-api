@@ -48,8 +48,8 @@ const server = app.listen(port, host, async () => {
   
   try {
     // Check authentication configuration
-    if (!process.env.ADMIN_USERNAME || !process.env.ADMIN_PASSWORD || !process.env.JWT_SECRET) {
-      console.warn('Authentication not properly configured. Please set ADMIN_USERNAME, ADMIN_PASSWORD, and JWT_SECRET in .env file.');
+    if (!process.env.JWT_SECRET) {
+      console.warn('Authentication not properly configured. JWT_SECRET in .env file.');
     } else {
       console.log('Authentication configured successfully');
     }
