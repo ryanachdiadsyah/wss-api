@@ -322,6 +322,12 @@ export const sendTextMessage = async (
       throw new Error('Session not connected');
     }
 
+    // ✅ Validasi nomor WhatsApp
+    const [check] = await session.socket.onWhatsApp(jid);
+    if (!check?.exists) {
+      throw new Error('Invalid WhatsApp number');
+    }
+
     const msg = await session.socket.sendMessage(jid, { text }, options);
 
     // Store message in database
@@ -358,6 +364,12 @@ export const sendMediaMessage = async (
 
     if (!session || !session.isConnected) {
       throw new Error('Session not connected');
+    }
+
+    // ✅ Validasi nomor WhatsApp
+    const [check] = await session.socket.onWhatsApp(jid);
+    if (!check?.exists) {
+      throw new Error('Invalid WhatsApp number');
     }
 
     const msg = await session.socket.sendMessage(jid, {
