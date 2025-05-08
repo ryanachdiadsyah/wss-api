@@ -119,14 +119,14 @@ export const getMessages = async (req: Request, res: Response) => {
     return res.status(200).json({ 
       messages: messages.map(msg => ({
         ...msg,
-        content: JSON.parse(msg.content)
+        content: typeof msg.content === 'string' ? JSON.parse(msg.content) : msg.content
       })),
       pagination: {
         total,
         limit: Number(limit),
         offset: Number(offset)
       }
-    });
+    });    
   } catch (error) {
     console.error('Error getting messages:', error);
     return res.status(500).json({ error: 'Failed to get messages' });
@@ -138,10 +138,15 @@ export const getMessages = async (req: Request, res: Response) => {
  */
 export const getMessageById = async (req: Request, res: Response) => {
   try {
-    const { messageId } = req.params;
+    const { messageId, sessionId } = req.params;
 
     const message = await prisma.message.findUnique({
-      where: { messageId }
+      where: {
+        messageId_sessionId: {
+          messageId,
+          sessionId
+        }
+      }
     });
     
     if (!message) {
@@ -151,7 +156,7 @@ export const getMessageById = async (req: Request, res: Response) => {
     return res.status(200).json({ 
       message: {
         ...message,
-        content: JSON.parse(message.content)
+        content: typeof message.content === 'string' ? JSON.parse(message.content) : message.content
       }
     });
   } catch (error) {
