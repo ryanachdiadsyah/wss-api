@@ -1,6 +1,8 @@
 # Dependencies
 node_modules/
 yarn-error.log
+package-lock.json
+yarn.lock
 
 # Build
 dist/
@@ -11,6 +13,7 @@ dist/
 .env.development.local
 .env.test.local
 .env.production.local
+.htaccess
 
 # Sessions
 sessions/
