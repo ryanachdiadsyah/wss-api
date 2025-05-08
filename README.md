@@ -1,161 +1,94 @@
-# WhatsApp Baileys API
+# WhatsApp Service Server
 
-Uma API REST para WhatsApp usando a biblioteca Baileys, Express e Prisma.
+UNOFFICIAL Whatsapp Rest API using Baileys, Express and Prisma.
 
-## Descrição
+## Description
 
-Este projeto fornece uma API REST para interagir com o WhatsApp Web usando a biblioteca Baileys. Ele permite:
+This project provides a REST API to interact with WhatsApp Web using the Baileys library. It allows you to:
 
-- Gerenciar múltiplas sessões do WhatsApp
-- Enviar e receber mensagens
-- Configurar webhooks para receber eventos em tempo real
-- Armazenar histórico de mensagens em banco de dados
+- Manage multiple WhatsApp sessions
+- Send and receive messages
+- Configure webhooks to receive real-time events
+- Store message history in a database
 
-## Tecnologias Utilizadas
+## TechStack
 
-- **TypeScript**: Linguagem de programação
-- **Express**: Framework web
-- **Baileys**: Biblioteca para interação com WhatsApp Web
-- **Prisma**: ORM para acesso ao banco de dados
-- **PostgreSQL**: Banco de dados relacional
-- **Docker**: Containerização
+- **TypeScript**: Programming language
+- **Express**: Web framework
+- **Baileys**: Library for interacting with WhatsApp Web
+- **Prisma**: ORM for database access
+- **PostgreSQL**: Relational database
+- **Docker**: Containerization
 
-## Estrutura do Projeto
+## Project Structure
 
-O projeto segue uma arquitetura componentizada:
+The project follows a componentized architecture :
 
 ```
-wa-baileys-api/
-├── prisma/                  # Configuração e modelos do Prisma
-├── src/                     # Código fonte
-│   ├── controllers/         # Controladores da API
-│   ├── routes/              # Rotas da API
-│   ├── services/            # Serviços de negócio
-│   └── index.ts             # Ponto de entrada da aplicação
-├── .env.example             # Exemplo de variáveis de ambiente
-├── docker-compose.yml       # Configuração do Docker Compose
-├── Dockerfile               # Configuração do Docker
-├── package.json             # Dependências e scripts
-├── tsconfig.json            # Configuração do TypeScript
-└── README.md                # Documentação
+wss/
+├── prisma/               # Prisma configuration and templates
+├── src/                  # Source code
+│   ├── controllers/      # API controllers
+│   ├── routes/           # API routes
+│   ├── services/         # Business services
+│   └── index.ts          # Application entry point
+├── .env.example          # Example environment variables
+├── docker-compose.yml    # Docker Compose configuration
+├── Dockerfile            # Docker configuration
+├── package.json          # Dependencies and scripts
+├── tsconfig.json         # Docker configuration TypeScript
+└── README.md             # Documentation
 ```
 
-## Instalação e Execução
+## Installation and Execution
 
-### Pré-requisitos
+### Prerequisites
 
-- Node.js 18 ou superior
+- Node.js 18 or higher
 - NPM
-- PostgreSQL (ou Docker para executar o banco de dados)
+- PostgreSQL (or Docker to run the database)
 
-### Configuração
+### Configuration
 
-1. Clone o repositório:
-   ```bash
-   git clone https://github.com/wnexous/wa-baileys-api.git
-   cd wa-baileys-api
-   ```
+1. Clone the repository:
+  ```bash
+  git clone https://github.com/ryanachdiadsyah/wss-api.git
+  cd wss-api
+  ```
 
-2. Instale as dependências:
-   ```bash
-   npm install
-   ```
+2. Install the dependencies:
+  ```bash
+  npm install
+  ```
 
-3. Configure as variáveis de ambiente:
-   ```bash
-   cp .env.example .env
-   ```
-   Edite o arquivo `.env` com suas configurações.
+3. Set the environment variables:
+  ```bash
+  cp .env.example .env
+  ```
+Edit the `.env` file with your settings.
 
-4. Configure o banco de dados:
-   ```bash
-   npm run prisma:migrate
-   ```
+4. Set the database:
+  ```bash
+  npm run prisma:migrate
+  ```
 
-### Execução Local
+### On Local
 
 ```bash
-# Desenvolvimento
+# Development
 npm run dev
 
-# Produção
+# Production
 npm run build
 npm start
 ```
 
-### Execução com Docker
+### On Docker
 
 ```bash
 docker-compose up -d
 ```
 
-## API Endpoints
-
-### Sessões
-
-- `POST /api/sessions`: Criar uma nova sessão
-- `GET /api/sessions`: Listar todas as sessões
-- `GET /api/sessions/:sessionId`: Obter detalhes de uma sessão
-- `GET /api/sessions/:sessionId/qr`: Obter QR code para autenticação
-- `DELETE /api/sessions/:sessionId`: Excluir uma sessão
-
-### Mensagens
-
-- `POST /api/messages/text`: Enviar mensagem de texto
-- `POST /api/messages/media`: Enviar mensagem de mídia
-- `GET /api/messages`: Listar mensagens
-- `GET /api/messages/:messageId`: Obter detalhes de uma mensagem
-
-### Webhooks
-
-- `POST /api/webhooks`: Registrar um novo webhook
-- `GET /api/webhooks`: Listar webhooks
-- `PUT /api/webhooks/:webhookId`: Atualizar um webhook
-- `DELETE /api/webhooks/:webhookId`: Excluir um webhook
-
-## Webhooks
-
-Os webhooks permitem receber notificações em tempo real sobre eventos do WhatsApp. Você pode configurar um URL para receber eventos como:
-
-- `connection.open`: Quando uma sessão é conectada
-- `connection.logout`: Quando uma sessão é desconectada
-- `qr.update`: Quando um novo QR code é gerado
-- `messages.received`: Quando uma nova mensagem é recebida
-
-## Exemplos de Uso
-
-### Criar uma Sessão
-
-```bash
-curl -X POST http://localhost:3000/api/sessions \
-  -H "Content-Type: application/json" \
-  -d '{"sessionId": "minha-sessao"}'
-```
-
-### Enviar uma Mensagem
-
-```bash
-curl -X POST http://localhost:3000/api/messages/text \
-  -H "Content-Type: application/json" \
-  -d '{
-    "sessionId": "minha-sessao",
-    "jid": "5511999999999@s.whatsapp.net",
-    "text": "Olá, mundo!"
-  }'
-```
-
-### Registrar um Webhook
-
-```bash
-curl -X POST http://localhost:3000/api/webhooks \
-  -H "Content-Type: application/json" \
-  -d '{
-    "sessionId": "minha-sessao",
-    "url": "https://meu-site.com/webhook",
-    "events": ["messages.received", "connection.open"]
-  }'
-```
-
-## Licença
+## License
 
 MIT
