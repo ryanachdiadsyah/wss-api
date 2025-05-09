@@ -93,7 +93,13 @@ export const getAllSessions = async (req: Request, res: Response) => {
       }
     });
 
-    return res.status(200).json({ sessions });
+    return res.status(200).json({
+      'message': 'Sessions retrieved successfully',
+      'validUntil': user.valid_until,
+      'mySessionLimit': user.maxSession,	
+      'totalSession': sessions.length,
+      'sessions': sessions
+    });
   } catch (error) {
     console.error('Error getting sessions:', error);
     return res.status(500).json({ error: 'Failed to get sessions' });

@@ -27,6 +27,15 @@ const sessions = new Map<string, {
   isConnected: boolean;
 }>();
 
+// Mapping status angka ke string
+const statusMap: Record<number, string> = {
+  1: 'PENDING',
+  2: 'SENT',
+  3: 'RECEIVED',
+  4: 'READ'
+};
+
+
 /**
  * Initialize WhatsApp sessions from database
  */
@@ -43,7 +52,7 @@ export const initializeWhatsAppSessions = async (): Promise<void> => {
     // Get all sessions from database
     const dbSessions = await prisma.whatsAppSession.findMany();
 
-    
+
     // Initialize each session
     for (const session of dbSessions) {
       try {
@@ -156,17 +165,17 @@ export const deleteWhatsAppSession = async (sessionId: string) => {
 export const getSessionQRCode = async (sessionId: string): Promise<string | null> => {
   console.log(`Getting QR code for session ${sessionId}`);
   const session = sessions.get(sessionId);
-  
+
   if (!session) {
     console.log(`Session ${sessionId} not found in memory`);
     return null;
   }
-  
+
   if (!session.qrCode) {
     console.log(`No QR code available for session ${sessionId}`);
     return null;
   }
-  
+
   console.log(`QR code found for session ${sessionId}`);
   return session.qrCode;
 };
@@ -203,7 +212,6 @@ const createWhatsAppSocket = async (sessionId: string): Promise<WASocket> => {
     // browser: Browsers.ubuntu('Chrome'),
     syncFullHistory: true
   });
-  // console.log("socket", socket)
 
   // Store session in memory
   sessions.set(sessionId, {
@@ -218,7 +226,7 @@ const createWhatsAppSocket = async (sessionId: string): Promise<WASocket> => {
     // Update QR code
     if (qr) {
       console.log(`QR code received for session ${sessionId}:`, qr.substring(0, 50) + '...');
-      
+
       // Atualizar a sessão no Map
       const session = sessions.get(sessionId);
       if (session) {
@@ -304,6 +312,34 @@ const createWhatsAppSocket = async (sessionId: string): Promise<WASocket> => {
     }
   });
 
+  // Handle message status updates
+  socket.ev.on('messages.update', async (updates) => {
+    for (const update of updates) {
+      const { key, update: messageUpdate } = update;
+
+      try {
+        const numericStatus = messageUpdate.status;
+
+        // Ubah angka ke status teks jika tersedia
+        const mappedStatus = numericStatus !== undefined ? statusMap[numericStatus] || 'UNKNOWN' : undefined;
+
+        await sendWebhookEvent(sessionId, 'messages.update', {
+          messageId: key.id,
+          jid: key.remoteJid,
+          participant: key.participant || null,
+          status: {
+            ackCode: numericStatus,
+            description: mappedStatus
+          }
+        });
+
+        console.log(`Message ${key.id} status updated: ${mappedStatus || 'no status'}`);
+      } catch (error) {
+        console.error('Error updating message status:', error);
+      }
+    }
+  });
+
   return socket;
 };
 
@@ -381,7 +417,6 @@ export const sendMediaMessage = async (
     }, options);
 
     // Store message in database
-
     if (msg)
       await prisma.message.create({
         data: {

@@ -16,8 +16,6 @@
                 <div>
                     <h2><i class="bi bi-whatsapp text-success"></i> Whatsapp Service Standalone</h2>
                     <p class="lead">Session Management</p>
-                    <h5 id="username"></h5>
-                    <p id="validDate"></p>
                 </div>
                 <div>
                     <button id="logout-button" class="btn btn-outline-danger">
@@ -26,11 +24,19 @@
                 </div>
             </div>
         </header>
+        <hr>
         <div class="row mb-4">
-            <div class="col-md-4">
+            <div class="col">
+                <h5 id="username"></h5>
+                <p id="validDate"></p>
+            </div>
+            <div class="col-md-6">
                 <div class="form-group">
                     <label for="myApiKey">Authorization Key</label>
-                    <input type="text" class="form-control" id="myApiKey" readonly disabled>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="myApiKey" readonly disabled>
+                        <a href="https://documenter.getpostman.com/view/6033139/2sB2j9899q" class="btn btn-warning" target="_blank">See Postman Documentation</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -142,6 +148,14 @@
                                                     <input class="form-check-input webhook-event" type="checkbox" value="connection.open" id="event-connection-open">
                                                     <label class="form-check-label" for="event-connection-open">
                                                         Connection
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-check">
+                                                    <input class="form-check-input webhook-event" type="checkbox" value="messages.update" id="event-messages-update">
+                                                    <label class="form-check-label" for="event-messages-update">
+                                                        Read and Delivered
                                                     </label>
                                                 </div>
                                             </div>

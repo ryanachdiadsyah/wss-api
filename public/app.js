@@ -403,6 +403,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else if (event === 'qr.update') {
                     badgeClass = 'bg-warning';
                     eventName = 'QR Code';
+                } else if (event === 'messages.update') {
+                    badgeClass = 'bg-info';
+                    eventName = 'Read and Delivered';
                 }
                 
                 return `<span class="badge ${badgeClass} me-1">${eventName}</span>`;

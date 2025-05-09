@@ -57,7 +57,7 @@ export const verifyApiKey = async (req: Request, res: Response, next: NextFuncti
     const authHeader = req.headers.authorization;
     
     if (!authHeader) {
-      return res.status(401).json({ error: 'Token tidak di temukan' });
+      return res.status(401).json({ error: 'Anda belum menyertakan ApiKey' });
     }
     
     const token = authHeader.split(' ')[1];
@@ -68,7 +68,7 @@ export const verifyApiKey = async (req: Request, res: Response, next: NextFuncti
     });
 
     if (!user) {
-      return res.status(401).json({ error: 'Token tidak valid' });
+      return res.status(401).json({ error: 'ApiKey tidak valid' });
     }
 
     if (!user.is_active) {
@@ -86,7 +86,7 @@ export const verifyApiKey = async (req: Request, res: Response, next: NextFuncti
     next();
 
   } catch (error) {
-      console.error('Erro na verificação do token:', error);
-      return res.status(500).json({ error: 'Erro interno do servidor' });
+      console.error('Gagal Memverifikasi ApiKey:', error);
+      return res.status(500).json({ error: 'Terjadi kesalahan server' });
   }
 };

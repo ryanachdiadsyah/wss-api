@@ -37,7 +37,7 @@ export const sendWebhookEvent = async (
       axios.post(webhook.url, payload, {
         headers: {
           'Content-Type': 'application/json',
-          'User-Agent': 'WA-Baileys-API'
+          'User-Agent': 'WSS-API'
         },
         timeout: 10000 // 10 seconds timeout
       }).catch(error => {
